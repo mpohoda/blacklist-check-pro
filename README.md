@@ -7,7 +7,7 @@ Check blacklisting for domains and IP addresses in shell.
 
 Works on UNIX/Linux systems with Bash.
 
-Blacklists grabbed from http://multirbl.valli.org/ (all DNSBLs).
+Blacklists grabbed from http://multirbl.valli.org/ (all DNSBLs) and other.
 
 ![ScreenShot](http://aarvik.dk/content/images/2013/Dec/bl.png)
 
@@ -25,6 +25,9 @@ Blacklists grabbed from http://multirbl.valli.org/ (all DNSBLs).
     
     # Pipe with other UNIX utils, eg. grep. Only blacklisted:
     $ bl domain.tld | grep "blacklisted"
+    
+    # or from SRV list
+    $ dig txt +short qualityunit.com | tr " " "\n" | awk -F: '{if(NR>1)print $2}' | head -n -3 | xargs -L1 ./bl -q -a -d
 
 ###Sample output
 

@@ -2,33 +2,38 @@
 
 ####################################################################
 # bl - BLACKLIST CHECK UNIX/LINUX UTILITY                          #
-# copyright: (c) 2014 Anders Aarvik                                #
-# author: Anders Aarvik (aarvik92@gmail.com) and contributors      #
+# copyright: (c) 2018 Mikso                                        #
+# author: Mikso and as original author Anders Aarvik               #
 # license: MIT licensed. See LICENSE                               #
 # description: I was just a bit tired of web interfaces            #
 ####################################################################
+
+QUIET="FALSE"
+ALARM="FALSE"
+ADMIN="mpohoda@qualityunit.com"
+MAILFROM="mpohoda@qualityunit.com"
+WARNDAYS=30
 
 #### main ####
 main() {
 
   [ $# -ne 1 ] && error "Please specify a FQDN or IP as a parameter."
 
-  fqdn=$(echo $1 | grep -P "(?=^.{5,254}$)(^(?:(?!\d+\.)[a-za-z0-9_\-]{1,63}\.?)+(?:[a-za-z]{2,})$)")
+  fqdn=$(echo ${DOM} | grep -P "(?=^.{5,254}$)(^(?:(?)[a-za-z0-9_\-]{1,63}\.?)+(?:[a-za-z]{2,})$)")
 
   if [[ $fqdn ]] ; then
 
-    echo "You entered a domain: $1"
+    echo "You entered a domain: ${DOM}"
 
-    domain=$(host $1 | head -n1 | awk '{print $4}')
+    domain=$(host ${DOM} | head -n1 | awk '{print $4}')
 
     reverseit $domain "IP not valid or domain could not be resolved."
   else
-
-    echo "You entered an IP: $1"
-    reverseit $1 "IP not valid."
+    echo "You entered an IP: ${DOM}"
+    reverseit ${DOM} "IP not valid."
   fi
 
-  loopthroughblacklists $1
+  loopthroughblacklists ${DOM}
 }
 
 #### reverseit ####
@@ -49,27 +54,38 @@ loopthroughblacklists() {
 
   reverse_dns=$(dig +short -x $1)
 
-  echo $1 name ${reverse_dns:----}
+  echo ${DOM} name ${reverse_dns:----}
 
   for bl in ${blacklists} ; do
-
-      printf $(env tz=utc date "+%y-%m-%d_%h:%m:%s_%z")
-      printf "%-40s" " ${reverse}.${bl}."
 
       listed="$(dig +short -t a ${reverse}.${bl}.)"
 
       if [[ $listed ]]; then
 
         if [[ $listed == *"timed out"* ]]; then
-
-          echo "[timed out]" | cecho YELLOW 
-        else
-        
+          if [ "${QUIET}" == "FALSE" ]
+          then
+          printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
+          printf "%-50s" " ${reverse}.${bl}."
+          echo "[timed out]" | cecho YELLOW
+          fi
+          else
+          if [ "${ALARM}" == "TRUE" ]
+          then
+                echo "The domain ${DOM} has been blacklisted by ${bl}" \
+                | mail -s "Domain ${DOM} has been blacklisted" -a "From: ${MAILFROM}" ${ADMIN}
+          fi
+          printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
+          printf "%-50s" " ${reverse}.${bl}."
           echo "[blacklisted] (${listed})" | cecho LRED
         fi
       else
-
+          if [ "${QUIET}" == "FALSE" ]
+          then
+          printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
+          printf "%-50s" " ${reverse}.${bl}."
           echo "[not listed]" | cecho LGREEN
+          fi
       fi
   done
 }
@@ -130,7 +146,7 @@ blacklists="
   fresh15.spameatingmonkey.net
   uribl.spameatingmonkey.net
   urired.spameatingmonkey.net
-  dbl.spamhaus.org
+  sbl.spamhaus.org
   multi.surbl.org
   uribl.swinog.ch
   dob.sibl.support-intelligence.net
@@ -148,7 +164,147 @@ blacklists="
   _vouch.dwl.spamhaus.org
   white.uribl.com
   list.anonwhois.net
+  0spam-killlist.fusionzero.com
+  0spam.fusionzero.com
+  access.redhawk.org
+  all.rbl.jp
+  all.spam-rbl.fr
+  all.spamrats.com
+  aspews.ext.sorbs.net
+  b.barracudacentral.org
+  backscatter.spameatingmonkey.net
+  badnets.spameatingmonkey.net
+  bb.barracudacentral.org
+  bl.drmx.org
+  bl.konstant.no
+  bl.nszones.com
+  bl.spamcannibal.org
+  bl.spameatingmonkey.net
+  bl.spamstinks.com
+  black.junkemailfilter.com
+  blackholes.five-ten-sg.com
+  blacklist.sci.kun.nl
+  blacklist.woody.ch
+  bogons.cymru.com
+  cart00ney.surriel.com
+  cbl.abuseat.org
+  cbl.anti-spam.org.cn
+  cblless.anti-spam.org.cn
+  cblplus.anti-spam.org.cn
+  cdl.anti-spam.org.cn
+  cidr.bl.mcafee.com
+  combined.rbl.msrbl.net
+  db.wpbl.info
+  dev.null.dk
+  dialups.visi.com
+  dnsbl-0.uceprotect.net
+  dnsbl-1.uceprotect.net
+  dnsbl-2.uceprotect.net
+  dnsbl-3.uceprotect.net
+  dnsbl.anticaptcha.net
+  dnsbl.inps.de
+  dnsbl.justspam.org
+  dnsbl.kempt.net
+  dnsbl.madavi.de
+  dnsbl.rizon.net
+  dnsbl.rv-soft.info
+  dnsbl.rymsho.ru
+  dnsbl.sorbs.net
+  dnsbl.zapbl.net
+  dnsrbl.swinog.ch
+  dul.pacifier.net
+  dyn.nszones.com
+  dyna.spamrats.com
+  fnrbl.fast.net
+  images.rbl.msrbl.net
+  ips.backscatterer.org
+  ix.dnsbl.manitu.net
+  korea.services.net
+  l2.bbfh.ext.sorbs.net
+  l3.bbfh.ext.sorbs.net
+  l4.bbfh.ext.sorbs.net
+  list.bbfh.org
+  list.blogspambl.com
+  mail-abuse.blacklist.jippg.org
+  netbl.spameatingmonkey.net
+  netscan.rbl.blockedservers.com
+  no-more-funn.moensted.dk
+  noptr.spamrats.com
+  orvedb.aupads.org
+  pbl.spamhaus.org
+  phishing.rbl.msrbl.net
+  pofon.foobar.hu
+  psbl.surriel.com
+  rbl.abuse.ro
+  rbl.blockedservers.com
+  rbl.dns-servicios.com
+  rbl.efnet.org
+  rbl.efnetrbl.org
+  rbl.iprange.net
+  rbl.schulte.org
+  rbl.talkactive.net
+  rbl2.triumf.ca
+  rsbl.aupads.org
+  sbl-xbl.spamhaus.org
+  sbl.nszones.com
+  short.rbl.jp
+  spam.dnsbl.anonmails.de
+  spam.pedantic.org
+  spam.rbl.blockedservers.com
+  spam.rbl.msrbl.net
+  spam.spamrats.com
+  spamrbl.imp.ch
+  spamsources.fabel.dk
+  st.technovision.dk
+  tor.dan.me.uk
+  tor.dnsbl.sectoor.de
+  tor.efnet.org
+  torexit.dan.me.uk
+  truncate.gbudb.net
+  ubl.unsubscore.com
+  virbl.dnsbl.bit.nl
+  virus.rbl.jp
+  virus.rbl.msrbl.net
+  vote.drbl.caravan.ru
+  vote.drbl.gremlin.ru
+  web.rbl.msrbl.net
+  work.drbl.caravan.ru
+  work.drbl.gremlin.ru
+  wormrbl.imp.ch
+  xbl.spamhaus.org
+  zen.spamhaus.org
 "
+##########################################
+# Purpose: Describe how the script works
+# Arguments:
+#   None
+##########################################
+usage()
+{
+        echo "Usage: $0 IP or DOMAIN [ -e email ] [ -x expir_days ] [ -q ]  [ -a ] [ -h ]"
+        echo ""
+        echo "  -a               : Send a warning message through email "
+        echo "  -d domain        : Domain to analyze (interactive mode)"
+        echo "  -e email address : Email address to send expiration notices"
+        echo "  -h               : Print this screen"
+        echo "  -x days          : Domain expiration interval (eg. if domain_date < days)"
+        echo ""
+}
+
+while getopts ae:f:hd:s:qx: option
+do
+        case "${option}"
+        in
+                a) ALARM="TRUE";;
+                e) ADMIN=${OPTARG};;
+                d) DOM=${OPTARG};;
+                x) WARNDAYS=$OPTARG;;
+                h) usage;;
+                q) QUIET="TRUE";;
+                \?) usage
+                    exit 1;;
+        esac
+done
 
 ### initiate script ###
 main $1
