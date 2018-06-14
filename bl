@@ -66,7 +66,7 @@ loopthroughblacklists() {
           if [ "${QUIET}" == "FALSE" ]
           then
           printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
-          printf "%-50s" " ${reverse}.${bl}."
+          printf "%-60s" " ${reverse}.${bl}."
           echo "[timed out]" | cecho YELLOW
           fi
           else
@@ -76,14 +76,14 @@ loopthroughblacklists() {
                 | mail -s "Domain ${DOM} has been blacklisted" -a "From: ${MAILFROM}" ${ADMIN}
           fi
           printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
-          printf "%-50s" " ${reverse}.${bl}."
+          printf "%-60s" " ${reverse}.${bl}."
           echo "[blacklisted] (${listed})" | cecho LRED
         fi
       else
           if [ "${QUIET}" == "FALSE" ]
           then
           printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
-          printf "%-50s" " ${reverse}.${bl}."
+          printf "%-60s" " ${reverse}.${bl}."
           echo "[not listed]" | cecho LGREEN
           fi
       fi
