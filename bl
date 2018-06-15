@@ -69,11 +69,15 @@ loopthroughblacklists() {
           printf "%-60s" " ${reverse}.${bl}."
           echo "[timed out]" | cecho YELLOW
           fi
+          elif [[ $listed == *"127.0.0.1"* ]]; then
+          printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
+          printf "%-60s" " ${reverse}.${bl}."
+          echo "[whitelisted] (${listed})" | cecho LWHITE
           else
           if [ "${ALARM}" == "TRUE" ]
           then
-                echo "The domain ${DOM} has been blacklisted by ${bl}" \
-                | mail -s "Domain ${DOM} has been blacklisted" -a "From: ${MAILFROM}" ${ADMIN}
+                echo "The host or IP ${DOM} has been blacklisted by ${bl}" \
+                | mail -s "Host or IP ${DOM} has been blacklisted" -a "From: ${MAILFROM}" ${ADMIN}
           fi
           printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
           printf "%-60s" " ${reverse}.${bl}."
@@ -172,6 +176,7 @@ blacklists="
   all.spamrats.com
   aspews.ext.sorbs.net
   b.barracudacentral.org
+  bl.mailspike.net
   backscatter.spameatingmonkey.net
   badnets.spameatingmonkey.net
   bb.barracudacentral.org
@@ -180,6 +185,7 @@ blacklists="
   bl.nszones.com
   bl.spamcannibal.org
   bl.spameatingmonkey.net
+  bl.spamcop.net
   bl.spamstinks.com
   black.junkemailfilter.com
   blackholes.five-ten-sg.com
@@ -235,6 +241,7 @@ blacklists="
   phishing.rbl.msrbl.net
   pofon.foobar.hu
   psbl.surriel.com
+  spam.abuse.ch
   rbl.abuse.ro
   rbl.blockedservers.com
   rbl.dns-servicios.com
@@ -284,7 +291,7 @@ usage()
         echo "Usage: $0 IP or DOMAIN [ -e email ] [ -x expir_days ] [ -q ]  [ -a ] [ -h ]"
         echo ""
         echo "  -a               : Send a warning message through email "
-        echo "  -d domain        : Domain to analyze (interactive mode)"
+        echo "  -d domain        : Host to analyze (interactive mode)"
         echo "  -e email address : Email address to send expiration notices"
         echo "  -h               : Print this screen"
         echo "  -x days          : Domain expiration interval (eg. if domain_date < days)"
