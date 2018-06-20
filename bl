@@ -69,11 +69,14 @@ loopthroughblacklists() {
           printf "%-60s" " ${reverse}.${bl}."
           echo "[timed out]" | cecho YELLOW
           fi
-          elif [[ $listed == *"127.0.0.1"* ]]; then
-          printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
-          printf "%-60s" " ${reverse}.${bl}."
-          echo "[whitelisted] (${listed})" | cecho LWHITE
-          else
+        elif [[ $listed == *"127.0.0.1"* ]]; then
+          if [ "${QUIET}" == "FALSE" ]
+          then
+                printf $(env tz=utc date "+%y-%m-%d_%H:%M:%S_%z")
+                printf "%-60s" " ${reverse}.${bl}."
+                echo "[whitelisted] (${listed})" | cecho LWHITE
+          fi
+        else
           if [ "${ALARM}" == "TRUE" ]
           then
                 echo "The host or IP ${DOM} has been blacklisted by ${bl}" \
